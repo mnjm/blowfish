@@ -1,9 +1,15 @@
 {{ $recentArticles := 5 }}
 {{ $recentArticles = .Site.Params.homepage.showRecentItems }}
+{{ $orderByWeight := .Site.Params.homepage.orderByWeight | default false }}
+{{ $s := newScratch }}
+{{ if $orderByWeight }}
+  {{ $s.Set "pages" (.Paginate (where .Site.RegularPages.ByWeight "Type" "in" .Site.Params.mainSections)).Pages }}
+{{ else }}
+  {{ $s.Set "pages" (.Paginate (where .Site.RegularPages.ByDate.Reverse "Type" "in" .Site.Params.mainSections)).Pages }}
+{{ end }}
 
 <section class="w-full grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-  {{ range first $recentArticles (.Paginate (where .Site.RegularPages "Type" "in"
-  .Site.Params.mainSections)).Pages }}
+  {{ range first $recentArticles ($s.Get "pages") }}
   {{ partial "article-link/card.html" . }}
   {{ end }}
 </section>
